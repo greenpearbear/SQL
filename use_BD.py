@@ -20,7 +20,7 @@ def movie_range(ot, do):
     con = sqlite3.connect("netflix.db")
     cur = con.cursor()
     sqlite_query = "SELECT `title`, `release_year` " \
-                   f"FROM netflix WHERE `release_year` BETWEEN ? AND  ?" \
+                   f"FROM netflix WHERE `type` = 'Movie' AND `release_year` BETWEEN ? AND  ?" \
                    f"ORDER BY `release_year` LIMIT 100"
     params = (ot, do)
     cur.execute(sqlite_query, params)
@@ -30,3 +30,20 @@ def movie_range(ot, do):
         list_data_return.append(dict({'title': i[0], 'release_year': i[1]}))
     con.close()
     return str(list_data_return)
+
+
+def rating_see(rating):
+    dict_rating = {"children": "G",
+                   "family": ['G', 'PG', 'PG-13'],
+                   "adult": ['R', 'NC-17']}
+    con = sqlite3.connect("netflix.db")
+    cur = con.cursor()
+    sqlite_query = "SELECT `title`, `rating`, `description` " \
+                   f"FROM netflix WHERE `rating` IN ?" \
+                   f"ORDER BY `release_year`"
+    cur.execute(sqlite_query, )
+    print(cur.fetchall())
+    list_data_return = []
+
+
+rating_see('family')
