@@ -11,6 +11,10 @@ def movie_info(title):
     return film
 
 
+@app.route('/movie/<ot>/to/<do>')
+def movie_range(ot, do):
+    film = use_BD.movie_range(ot, do)
+    return film
 
 
 if __name__ == '__main__':
