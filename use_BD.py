@@ -9,9 +9,8 @@ def search_title(word):
     sqlite_query = """
     SELECT `title`, `country`, `release_year`, `listed_in`, `description`
     FROM netflix 
-    WHERE `title` 
-    LIKE ? ORDER 
-    BY `date_added` 
+    WHERE `title` LIKE ? AND type = 'Movie'
+    ORDER BY `date_added` 
     DESC LIMIT 1
     """
     cur.execute(sqlite_query, ('%'+word+'%',))
@@ -38,7 +37,7 @@ def movie_range(ot, do):
     for i in list_sql:
         list_data_return.append(dict({'title': i[0], 'release_year': i[1]}))
     con.close()
-    return str(list_data_return)
+    return list_data_return
 
 
 def rating_see(rating):
@@ -52,3 +51,23 @@ def rating_see(rating):
                    f"ORDER BY `release_year`"
     cur.execute(sqlite_query, dict_rating[rating])
     return str(cur.fetchall())
+
+
+def genre_search(genre):
+    con = sqlite3.connect("netflix.db")
+    cur = con.cursor()
+    sqlite_query = """
+    SELECT `title`, `description`
+    FROM netflix 
+    WHERE `listed_in` LIKE ? AND `type` = 'Movie'
+    ORDER BY `release_year` 
+    DESC LIMIT 10
+    """
+    params = ('%'+genre+'%',)
+    cur.execute(sqlite_query, params)
+    list_sql = cur.fetchall()
+    list_data_return = []
+    for i in list_sql:
+        list_data_return.append(dict({'title': i[0], 'description': i[1]}))
+    con.close()
+    return list_data_return
