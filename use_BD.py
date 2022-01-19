@@ -2,13 +2,19 @@ import sqlite3
 
 
 def search_title(word):
-    con = sqlite3.connect("netflix.db")
-    cur = con.cursor()
-    sqlite_query = "SELECT `title`, `country`, `release_year`, `listed_in`, `description` " \
-                   f"FROM netflix WHERE `title` LIKE '%{word}%' ORDER BY `date_added` DESC LIMIT 1"
-    cur.execute(sqlite_query)
     list_key_dict = ["title", "country", "release_year", "genre", "description"]
     dict_search = {}
+    con = sqlite3.connect("netflix.db")
+    cur = con.cursor()
+    sqlite_query = """
+    SELECT `title`, `country`, `release_year`, `listed_in`, `description`
+    FROM netflix 
+    WHERE `title` 
+    LIKE ? ORDER 
+    BY `date_added` 
+    DESC LIMIT 1
+    """
+    cur.execute(sqlite_query, ('%'+word+'%',))
     list_sql = cur.fetchall()
     for key, value in enumerate(list_key_dict):
         dict_search.update({f'{value}': f'{list_sql[0][key]}'})
@@ -19,9 +25,12 @@ def search_title(word):
 def movie_range(ot, do):
     con = sqlite3.connect("netflix.db")
     cur = con.cursor()
-    sqlite_query = "SELECT `title`, `release_year` " \
-                   f"FROM netflix WHERE `type` = 'Movie' AND `release_year` BETWEEN ? AND  ?" \
-                   f"ORDER BY `release_year` LIMIT 100"
+    sqlite_query = """
+    SELECT `title`, `release_year`
+    FROM netflix 
+    WHERE `type` = 'Movie' AND `release_year` BETWEEN ? AND  ?
+    ORDER BY `release_year` LIMIT 100
+    """
     params = (ot, do)
     cur.execute(sqlite_query, params)
     list_sql = cur.fetchall()
@@ -33,17 +42,13 @@ def movie_range(ot, do):
 
 
 def rating_see(rating):
-    dict_rating = {"children": "G",
+    dict_rating = {"children": ['G'],
                    "family": ['G', 'PG', 'PG-13'],
                    "adult": ['R', 'NC-17']}
     con = sqlite3.connect("netflix.db")
     cur = con.cursor()
     sqlite_query = "SELECT `title`, `rating`, `description` " \
-                   f"FROM netflix WHERE `rating` IN ?" \
+                   f"FROM netflix WHERE `rating` IN ({','.join(['?']*len(dict_rating[rating]))})" \
                    f"ORDER BY `release_year`"
-    cur.execute(sqlite_query, )
-    print(cur.fetchall())
-    list_data_return = []
-
-
-rating_see('family')
+    cur.execute(sqlite_query, dict_rating[rating])
+    return str(cur.fetchall())

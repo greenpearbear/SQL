@@ -17,5 +17,11 @@ def movie_range(ot, do):
     return film
 
 
+@app.route('/movie/rating/<rating>')
+def movie_rating(rating):
+    film = use_BD.rating_see(rating)
+    return film
+
+
 if __name__ == '__main__':
     app.run()
