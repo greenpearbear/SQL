@@ -76,3 +76,32 @@ def genre_search(genre):
         list_data_return.append(dict({'title': i[0], 'description': i[1]}))
     con.close()
     return json.dumps(list_data_return, separators=(',', ':'), indent=4)
+
+
+def two_actors_search(one, two):
+    list_all_actors = []
+    actor_dict = {}
+    con = sqlite3.connect("netflix.db")
+    cur = con.cursor()
+    sqlite_query = """
+        SELECT `cast`
+        FROM netflix 
+        WHERE `cast` LIKE ? AND `cast` LIKE ?
+        ORDER BY `date_added` 
+        DESC LIMIT 10
+        """
+    params = ('%'+one+'%', '%'+two+'%')
+    cur.execute(sqlite_query, params)
+    list_sql = cur.fetchall()
+    for index_list in list_sql:
+        for index_tuple in index_list:
+            list_actor = index_tuple.split(', ')
+            for actor in list_actor:
+                if actor not in actor_dict.keys():
+                    actor_dict.update({f'{actor}': 1})
+                else:
+                    actor_dict.update({f'{actor}': actor_dict[f'{actor}'] + 1})
+    for key in actor_dict:
+        if actor_dict[key] > 2 and key != one and key != two:
+            list_all_actors.append(key)
+    return list_all_actors
