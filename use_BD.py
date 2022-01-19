@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 
 def search_title(word):
@@ -18,7 +19,7 @@ def search_title(word):
     for key, value in enumerate(list_key_dict):
         dict_search.update({f'{value}': f'{list_sql[0][key]}'})
     con.close()
-    return dict_search
+    return json.dumps(dict_search, separators=(',', ':'), indent=4)
 
 
 def movie_range(ot, do):
@@ -37,7 +38,7 @@ def movie_range(ot, do):
     for i in list_sql:
         list_data_return.append(dict({'title': i[0], 'release_year': i[1]}))
     con.close()
-    return list_data_return
+    return json.dumps(list_data_return, separators=(',', ':'), indent=4)
 
 
 def rating_see(rating):
@@ -50,7 +51,11 @@ def rating_see(rating):
                    f"FROM netflix WHERE `rating` IN ({','.join(['?']*len(dict_rating[rating]))})" \
                    f"ORDER BY `release_year`"
     cur.execute(sqlite_query, dict_rating[rating])
-    return str(cur.fetchall())
+    list_sql = cur.fetchall()
+    list_data_return = []
+    for i in list_sql:
+        list_data_return.append(dict({'title': i[0], 'rating': i[1], 'description': i[2]}))
+    return json.dumps(list_data_return, separators=(',', ':'), indent=4)
 
 
 def genre_search(genre):
@@ -60,7 +65,7 @@ def genre_search(genre):
     SELECT `title`, `description`
     FROM netflix 
     WHERE `listed_in` LIKE ? AND `type` = 'Movie'
-    ORDER BY `release_year` 
+    ORDER BY `date_added` 
     DESC LIMIT 10
     """
     params = ('%'+genre+'%',)
@@ -70,4 +75,4 @@ def genre_search(genre):
     for i in list_sql:
         list_data_return.append(dict({'title': i[0], 'description': i[1]}))
     con.close()
-    return list_data_return
+    return json.dumps(list_data_return, separators=(',', ':'), indent=4)
