@@ -105,3 +105,20 @@ def two_actors_search(one, two):
         if actor_dict[key] > 2 and key != one and key != two:
             list_all_actors.append(key)
     return list_all_actors
+
+
+def three_param_search(type_param, release_year, genre_param):
+    con = sqlite3.connect("netflix.db")
+    cur = con.cursor()
+    sqlite_query = """
+            SELECT `title`, `description`
+            FROM netflix 
+            WHERE `type`= ? AND `release_year` = ? AND `listed_in` LIKE ?
+            ORDER BY `date_added` 
+            DESC
+            """
+    params = (type_param, release_year, '%'+genre_param+'%')
+    cur.execute(sqlite_query, params)
+    list_sql = cur.fetchall()
+    json.dumps(list_sql, separators=(',', ':'), indent=4)
+    return json.dumps(list_sql, separators=(',', ':'), indent=4)
